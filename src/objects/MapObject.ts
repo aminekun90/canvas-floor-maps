@@ -14,23 +14,23 @@ export class MapObject implements IFloorMapObject {
     isRotating: boolean = false;
     initialMouseX: number = 0;
     initialMouseY: number = 0;
-    cornerRadius: number = 10;
+    cornerRadius: number = 0;
 
     // Define handles
     resizeHandle: Handle;
     rotateHandle: Handle;
     canvas: HTMLCanvasElement;
-    constructor(id: string, position: Position, size: Size, color: Color, canvas: HTMLCanvasElement, rotation: number = 0,cornerRadius: number =0) {
+    constructor(id: string, position: Position, size: Size, color: Color, canvas: HTMLCanvasElement, rotation: number = 0, cornerRadius: number = 0) {
         this.id = id;
         this.position = position;
         this.size = size;
         this.color = color;
         this.rotation = rotation;
         this.canvas = canvas;
-        this.cornerRadius=cornerRadius;
+        this.cornerRadius = cornerRadius;
         // Initialize handles
-        this.resizeHandle = new Handle(this.size.width, -this.size.height,20);
-        this.rotateHandle = new Handle(this.size.width,-this.size.height , 5);
+        this.resizeHandle = new Handle(this.position.x + this.size.width, this.position.y + this.size.height, 10);
+        this.rotateHandle = new Handle(this.position.x, this.position.y, 5);
 
         // Bind mouse events to the canvas
         this.bindMouseEvents();
@@ -59,6 +59,7 @@ export class MapObject implements IFloorMapObject {
         context.closePath();
         context.fill();
 
+        context.restore();
         // Draw the rotate handle
         context.beginPath();
         context.arc(this.rotateHandle.x, this.rotateHandle.y, this.rotateHandle.radius, 0, Math.PI * 2);
@@ -77,8 +78,7 @@ export class MapObject implements IFloorMapObject {
         context.lineWidth = 2;
         context.stroke();
         context.closePath();
-        
-        
+
     }
 
     move(newPosition: Position): void {
@@ -89,9 +89,10 @@ export class MapObject implements IFloorMapObject {
     updateHandles() {
         const centerX = this.position.x + this.size.width / 2;
         const centerY = this.position.y + this.size.height / 2;
-        this.resizeHandle.updatePosition(centerX, centerY, this.size.width / 2, this.size.height, this.rotation);
-        this.rotateHandle.updatePosition(centerX, centerY, -this.size.width, -this.size.height, this.rotation);
+        this.resizeHandle.updatePosition(centerX, centerY, this.size.width / 2, this.size.height / 2, this.rotation);
+        this.rotateHandle.updatePosition(centerX, centerY, -this.size.width / 2, -this.size.height / 2, this.rotation);
     }
+
 
     // Mouse interactions
     isMouseOver(x: number, y: number): boolean {
@@ -110,20 +111,21 @@ export class MapObject implements IFloorMapObject {
 
     updateCursorStyle(x: number, y: number): void {
         if (this.isMouseOverResizeHandle(x, y)) {
-            document.body.style.cursor = "se-resize"; // Cursor for resize
+            this.canvas.style.cursor = "se-resize"; // Cursor for resize
         } else if (this.isMouseOverRotateHandle(x, y)) {
-            document.body.style.cursor = "crosshair"; // Cursor for rotate
+            this.canvas.style.cursor = "crosshair"; // Cursor for rotate
         } else if (this.isMouseOver(x, y)) {
-            document.body.style.cursor = "pointer"; // Cursor for dragging the object
+            this.canvas.style.cursor = "pointer"; // Cursor for dragging the object
             if (this.isDragging) {
-                document.body.style.cursor = "grabbing";
+                this.canvas.style.cursor = "grabbing";
             }
         } else {
-            document.body.style.cursor = "default"; // Default cursor when not over object or handles
+            this.canvas.style.cursor = "default"; // Default cursor when not over object or handles
         }
     }
 
     onMouseMove(event: MouseEvent): void {
+        event.preventDefault()
         const x = event.offsetX;
         const y = event.offsetY;
 

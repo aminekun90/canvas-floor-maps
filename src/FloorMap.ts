@@ -24,7 +24,8 @@ export class FloorMap {
         this.context.fillStyle = options.backgroundColor ?? '#ffffff';
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.bindCanvasEvents();
-        this.startRedrawLoop();
+        this.redrawObjects();
+       
 
     }
     getCanvas(){
@@ -38,16 +39,6 @@ export class FloorMap {
         this.canvas.addEventListener('mouseleave', () => this.onMouseUp(new MouseEvent("mouseup"))); // Stop on mouse leave
     }
 
-    // Add a method to update and redraw everything
-    startRedrawLoop() {
-        const loop = () => {
-            this.clearCanvas();
-            this.redrawObjects();
-            requestAnimationFrame(loop); // Redraw on the next animation frame
-        };
-        loop();
-    }
-
     // Clear the canvas
     clearCanvas() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -55,6 +46,7 @@ export class FloorMap {
 
     // Redraw all objects
     redrawObjects() {
+        this.clearCanvas();
         this.objects.forEach((object) => {
             object.draw(this.context); // Draw each object (like Desk)
         });
@@ -62,26 +54,38 @@ export class FloorMap {
 
     // Mouse event handlers (delegated to objects)
     onMouseDown(event: MouseEvent) {
-        this.objects.forEach((object) => {
-            object.onMouseDown(event);
-        });
+        const x = event.offsetX;
+        const y = event.offsetY;
+
+        // Find the topmost object under the cursor
+        this.selectedObject = null; // Reset active object
+        for (let i = this.objects.length - 1; i >= 0; i--) {
+            const object = this.objects[i];
+            if (object.isMouseOver(x, y)) {
+                this.selectedObject = object;
+                this.selectedObject.onMouseDown(event); // Trigger object-specific logic
+                this.redrawObjects();
+                break; // Stop propagation to lower objects
+            }
+        }
     }
 
     onMouseMove(event: MouseEvent) {
-        this.objects.forEach((object) => {
-            object.onMouseMove(event);
-        });
+      
+            this.selectedObject?.onMouseMove(event);
+            this.redrawObjects();
+        
     }
 
     onMouseUp(event: MouseEvent) {
-        this.objects.forEach((object) => {
-            object.onMouseUp(event);
-        });
+        this.selectedObject?.onMouseUp(event);  
+        this.redrawObjects();    
     }
 
     // Add objects to the map
     addObject(object: IFloorMapObject) {
         this.objects.push(object);
+        this.redrawObjects();
     }
 
 }
