@@ -1,3 +1,5 @@
+export  * from './MapObject';
 export  * from './Desk';
 export  * from './Room';
-export  * from './Toilet';
+export  * from './Wall';
+export * from './Handle';

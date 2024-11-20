@@ -1,12 +1,12 @@
 import { Color, IFloorMapObject, Position, Size } from "../types";
 import { Handle } from "./Handle";
 
-export class Desk implements IFloorMapObject {
+export class MapObject implements IFloorMapObject {
     id: string;
     position: Position;
     size: Size;
     color: Color;
-    chairColor: Color;
+
     rotation: number;
     isBeingDragged: boolean = false;
     isDragging: boolean = false;
@@ -14,23 +14,23 @@ export class Desk implements IFloorMapObject {
     isRotating: boolean = false;
     initialMouseX: number = 0;
     initialMouseY: number = 0;
+    cornerRadius: number = 10;
 
     // Define handles
     resizeHandle: Handle;
     rotateHandle: Handle;
     canvas: HTMLCanvasElement;
-    constructor(id: string, position: Position, size: Size, color: Color, chairColor: Color, canvas: HTMLCanvasElement, rotation: number = 0,) {
+    constructor(id: string, position: Position, size: Size, color: Color, canvas: HTMLCanvasElement, rotation: number = 0,cornerRadius: number =0) {
         this.id = id;
         this.position = position;
         this.size = size;
         this.color = color;
-        this.chairColor = chairColor;
         this.rotation = rotation;
         this.canvas = canvas;
-
+        this.cornerRadius=cornerRadius;
         // Initialize handles
-        this.resizeHandle = new Handle(this.position.x + this.size.width, this.position.y + this.size.height, 10);
-        this.rotateHandle = new Handle(this.position.x, this.position.y , 5);
+        this.resizeHandle = new Handle(this.size.width, -this.size.height,20);
+        this.rotateHandle = new Handle(this.size.width,-this.size.height , 5);
 
         // Bind mouse events to the canvas
         this.bindMouseEvents();
@@ -45,36 +45,19 @@ export class Desk implements IFloorMapObject {
 
     draw(context: CanvasRenderingContext2D): void {
         context.save();
-
         // Translate to object center and apply rotation
         context.translate(this.position.x + this.size.width / 2, this.position.y + this.size.height / 2);
         context.rotate((this.rotation * Math.PI) / 180); // Convert degrees to radians
 
-        // Draw desk with rounded corners
         context.fillStyle = this.color;
-        const cornerRadius = 10;
-
         context.beginPath();
-        context.moveTo(-this.size.width / 2 + cornerRadius, -this.size.height / 2);
-        context.arcTo(this.size.width / 2, -this.size.height / 2, this.size.width / 2, this.size.height / 2, cornerRadius);
-        context.arcTo(this.size.width / 2, this.size.height / 2, -this.size.width / 2, this.size.height / 2, cornerRadius);
-        context.arcTo(-this.size.width / 2, this.size.height / 2, -this.size.width / 2, -this.size.height / 2, cornerRadius);
-        context.arcTo(-this.size.width / 2, -this.size.height / 2, this.size.width / 2, -this.size.height / 2, cornerRadius);
+        context.moveTo(-this.size.width / 2 + this.cornerRadius, -this.size.height / 2);
+        context.arcTo(this.size.width / 2, -this.size.height / 2, this.size.width / 2, this.size.height / 2, this.cornerRadius);
+        context.arcTo(this.size.width / 2, this.size.height / 2, -this.size.width / 2, this.size.height / 2, this.cornerRadius);
+        context.arcTo(-this.size.width / 2, this.size.height / 2, -this.size.width / 2, -this.size.height / 2, this.cornerRadius);
+        context.arcTo(-this.size.width / 2, -this.size.height / 2, this.size.width / 2, -this.size.height / 2, this.cornerRadius);
         context.closePath();
         context.fill();
-
-        // Draw chair below desk
-        context.beginPath();
-        context.arc(0, this.size.height / 3, (this.size.width + this.size.height) / 10, 0, Math.PI * 2);
-        context.fillStyle = this.chairColor;
-        context.fill();
-        context.strokeStyle = "#fff";
-        context.lineWidth = 2;
-        context.stroke();
-
-        context.restore(); // Restore the canvas to the original state
-
-        // this.updateHandles();
 
         // Draw the rotate handle
         context.beginPath();
@@ -84,7 +67,7 @@ export class Desk implements IFloorMapObject {
         context.strokeStyle = "#fff";
         context.lineWidth = 2;
         context.stroke();
-
+        context.closePath();
         // Draw the resize handle
         context.beginPath();
         context.rect(this.resizeHandle.x - 5, this.resizeHandle.y - 5, this.rotateHandle.radius, this.rotateHandle.radius);
@@ -93,6 +76,9 @@ export class Desk implements IFloorMapObject {
         context.strokeStyle = "#fff";
         context.lineWidth = 2;
         context.stroke();
+        context.closePath();
+        
+        
     }
 
     move(newPosition: Position): void {
@@ -103,8 +89,8 @@ export class Desk implements IFloorMapObject {
     updateHandles() {
         const centerX = this.position.x + this.size.width / 2;
         const centerY = this.position.y + this.size.height / 2;
-        this.resizeHandle.updatePosition(centerX, centerY, this.size.width / 2, this.size.height / 2, this.rotation);
-        this.rotateHandle.updatePosition(centerX, centerY, -this.size.width / 2, -this.size.height / 2, this.rotation);
+        this.resizeHandle.updatePosition(centerX, centerY, this.size.width / 2, this.size.height, this.rotation);
+        this.rotateHandle.updatePosition(centerX, centerY, -this.size.width, -this.size.height, this.rotation);
     }
 
     // Mouse interactions
@@ -129,7 +115,7 @@ export class Desk implements IFloorMapObject {
             document.body.style.cursor = "crosshair"; // Cursor for rotate
         } else if (this.isMouseOver(x, y)) {
             document.body.style.cursor = "pointer"; // Cursor for dragging the object
-            if(this.isDragging){
+            if (this.isDragging) {
                 document.body.style.cursor = "grabbing";
             }
         } else {
@@ -205,5 +191,5 @@ export class Desk implements IFloorMapObject {
         this.isRotating = false;
     }
 
-   
+
 }

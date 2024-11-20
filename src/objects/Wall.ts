@@ -1,6 +1,6 @@
 import { MapObject } from "./MapObject";
 
-export class Room extends MapObject {
-    
+export class Wall extends MapObject {
+   
     
 }

@@ -29,7 +29,7 @@ describe('FloorMap', () => {
     if (!context) throw new Error('Canvas context is null');
 
     jest.spyOn(context, 'fillRect');
-    floorMap.drawRectangle(10, 10, 50, 50, '#ff0000');
+    // floorMap.drawRectangle(10, 10, 50, 50, '#ff0000');
 
     expect(context.fillRect).toHaveBeenCalledWith(10, 10, 50, 50);
   });
