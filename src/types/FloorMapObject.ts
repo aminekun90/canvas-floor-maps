@@ -15,6 +15,7 @@ export interface IFloorMapObject {
     initialMouseX: number;
     initialMouseY: number;
     canvas: HTMLCanvasElement;
+    editable:boolean;
     bindMouseEvents(): void;
     draw(context: CanvasRenderingContext2D): void;
     updateHandles():void;

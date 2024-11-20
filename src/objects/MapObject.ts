@@ -6,6 +6,7 @@ export class MapObject implements IFloorMapObject {
     position: Position;
     size: Size;
     color: Color;
+    editable: boolean = true;
 
     rotation: number;
     isBeingDragged: boolean = false;
@@ -17,10 +18,18 @@ export class MapObject implements IFloorMapObject {
     cornerRadius: number = 0;
 
     // Define handles
-    resizeHandle: Handle;
-    rotateHandle: Handle;
+    resizeHandle?: Handle;
+    rotateHandle?: Handle;
     canvas: HTMLCanvasElement;
-    constructor(id: string, position: Position, size: Size, color: Color, canvas: HTMLCanvasElement, rotation: number = 0, cornerRadius: number = 0) {
+    constructor(id: string,
+        position: Position,
+        size: Size, color: Color,
+        canvas: HTMLCanvasElement,
+        rotation: number = 0,
+
+        cornerRadius: number = 0,
+        editable: boolean = true,
+    ) {
         this.id = id;
         this.position = position;
         this.size = size;
@@ -28,12 +37,16 @@ export class MapObject implements IFloorMapObject {
         this.rotation = rotation;
         this.canvas = canvas;
         this.cornerRadius = cornerRadius;
+        this.editable = editable;
         // Initialize handles
-        this.resizeHandle = new Handle(this.position.x + this.size.width, this.position.y + this.size.height, 10);
-        this.rotateHandle = new Handle(this.position.x, this.position.y, 5);
+        if (editable) {
+            this.resizeHandle = new Handle(this.position.x + this.size.width, this.position.y + this.size.height, 10);
+            this.rotateHandle = new Handle(this.position.x, this.position.y, 5);
+            // Bind mouse events to the canvas
+            this.bindMouseEvents();
+        }
 
-        // Bind mouse events to the canvas
-        this.bindMouseEvents();
+
     }
 
     bindMouseEvents() {
@@ -60,36 +73,45 @@ export class MapObject implements IFloorMapObject {
         context.fill();
 
         context.restore();
-        // Draw the rotate handle
-        context.beginPath();
-        context.arc(this.rotateHandle.x, this.rotateHandle.y, this.rotateHandle.radius, 0, Math.PI * 2);
-        context.fillStyle = "#ff5733";
-        context.fill();
-        context.strokeStyle = "#fff";
-        context.lineWidth = 2;
-        context.stroke();
-        context.closePath();
-        // Draw the resize handle
-        context.beginPath();
-        context.rect(this.resizeHandle.x - 5, this.resizeHandle.y - 5, this.rotateHandle.radius, this.rotateHandle.radius);
-        context.fillStyle = "#33ff57";
-        context.fill();
-        context.strokeStyle = "#fff";
-        context.lineWidth = 2;
-        context.stroke();
-        context.closePath();
+        if (this.editable) {
+            if (this.rotateHandle){// Draw the rotate handle
+                context.beginPath();
+                context.arc(this.rotateHandle.x, this.rotateHandle.y, this.rotateHandle.radius, 0, Math.PI * 2);
+                context.fillStyle = "#ff5733";
+                context.fill();
+                context.strokeStyle = "#fff";
+                context.lineWidth = 2;
+                context.stroke();
+                context.closePath();
+            }
+            if (this.resizeHandle) {// Draw the resize handle
+                context.beginPath();
+                context.rect(this.resizeHandle.x - 5, this.resizeHandle.y - 5, this.resizeHandle.radius, this.resizeHandle.radius);
+                context.fillStyle = "#33ff57";
+                context.fill();
+                context.strokeStyle = "#fff";
+                context.lineWidth = 2;
+                context.stroke();
+                context.closePath();
+            }
+        }
+
 
     }
 
     move(newPosition: Position): void {
         this.position = newPosition;
+
         this.updateHandles();
     }
 
     updateHandles() {
         const centerX = this.position.x + this.size.width / 2;
         const centerY = this.position.y + this.size.height / 2;
+        if(this.resizeHandle)
         this.resizeHandle.updatePosition(centerX, centerY, this.size.width / 2, this.size.height / 2, this.rotation);
+
+        if(this.rotateHandle)
         this.rotateHandle.updatePosition(centerX, centerY, -this.size.width / 2, -this.size.height / 2, this.rotation);
     }
 
@@ -102,11 +124,15 @@ export class MapObject implements IFloorMapObject {
     }
 
     isMouseOverRotateHandle(x: number, y: number): boolean {
+        if(this.rotateHandle)
         return this.rotateHandle.isMouseOver(x, y);
+        return false;
     }
 
     isMouseOverResizeHandle(x: number, y: number): boolean {
+        if(this.resizeHandle)
         return this.resizeHandle.isMouseOver(x, y);
+        return false;
     }
 
     updateCursorStyle(x: number, y: number): void {
@@ -125,6 +151,7 @@ export class MapObject implements IFloorMapObject {
     }
 
     onMouseMove(event: MouseEvent): void {
+        if(this.editable == false) return;
         event.preventDefault()
         const x = event.offsetX;
         const y = event.offsetY;
@@ -150,6 +177,8 @@ export class MapObject implements IFloorMapObject {
     }
 
     onMouseDown(event: MouseEvent): void {
+        if(this.editable == false) return;
+
         const x = event.offsetX;
         const y = event.offsetY;
 
@@ -165,6 +194,8 @@ export class MapObject implements IFloorMapObject {
     }
 
     onMouseUp(event: MouseEvent): void {
+        if(this.editable == false) return;
+
         this.isDragging = false;
         this.isResizing = false;
         this.isRotating = false;

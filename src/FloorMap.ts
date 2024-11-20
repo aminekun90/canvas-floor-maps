@@ -6,7 +6,7 @@ export class FloorMap {
     private readonly context: CanvasRenderingContext2D;
     private readonly objects: IFloorMapObject[];
     private selectedObject: IFloorMapObject | null = null;
-    
+
     constructor(container: HTMLElement, options: FloorMapOptions) {
         this.canvas = document.createElement('canvas');
         this.canvas.width = options.width;
@@ -25,10 +25,10 @@ export class FloorMap {
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.bindCanvasEvents();
         this.redrawObjects();
-       
+
 
     }
-    getCanvas(){
+    getCanvas() {
         return this.canvas;
     }
     bindCanvasEvents() {
@@ -56,35 +56,35 @@ export class FloorMap {
     onMouseDown(event: MouseEvent) {
         const x = event.offsetX;
         const y = event.offsetY;
-
-        // Find the topmost object under the cursor
+    
         this.selectedObject = null; // Reset active object
+        console.log(this.objects.length);
+        
+        // Iterate over objects from topmost to bottommost
         for (let i = this.objects.length - 1; i >= 0; i--) {
             const object = this.objects[i];
             if (object.isMouseOver(x, y)) {
                 this.selectedObject = object;
-                this.selectedObject.onMouseDown(event); // Trigger object-specific logic
-                this.redrawObjects();
+                object.onMouseDown( event); // Trigger object-specific logic
+                this.redrawObjects(); // Redraw canvas to reflect interaction
                 break; // Stop propagation to lower objects
             }
         }
     }
 
     onMouseMove(event: MouseEvent) {
-      
-            this.selectedObject?.onMouseMove(event);
-            this.redrawObjects();
-        
+        this.selectedObject?.onMouseMove(event);
+        this.redrawObjects();
     }
 
     onMouseUp(event: MouseEvent) {
-        this.selectedObject?.onMouseUp(event);  
-        this.redrawObjects();    
+        this.selectedObject?.onMouseUp(event);
+        this.redrawObjects();
     }
 
     // Add objects to the map
-    addObject(object: IFloorMapObject) {
-        this.objects.push(object);
+    addObjects(...objects: IFloorMapObject[]) {
+        this.objects.push(...objects);
         this.redrawObjects();
     }
 

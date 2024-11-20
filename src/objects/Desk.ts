@@ -5,8 +5,8 @@ import { MapObject } from "./MapObject";
 export class Desk extends MapObject implements IFloorMapObject {
     chairColor: Color;
    
-    constructor(id: string, position: Position, size: Size, color: Color, chairColor: Color, canvas: HTMLCanvasElement, rotation: number = 0,cornerRadius: number =10) {
-        super(id, position, size, color, canvas, rotation,cornerRadius);
+    constructor(id: string, position: Position, size: Size, color: Color, chairColor: Color, canvas: HTMLCanvasElement, rotation: number = 0,cornerRadius: number =10,editable:boolean = true) {
+        super(id, position, size, color, canvas, rotation,cornerRadius,editable);
         this.chairColor = chairColor;
     }
 

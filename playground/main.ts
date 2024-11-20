@@ -1,4 +1,4 @@
-import { FloorMap } from '../src/index'; // Import from src directly
+import { FloorMap, IFloorMapObject } from '../src/index'; // Import from src directly
 import { Desk, Room, Wall } from '../src/objects';
 
 const container = document.getElementById('container')!;
@@ -11,10 +11,15 @@ const canvas = map.getCanvas();
 
 // Create objects
 const room1 = new Room('room1', { x: 50, y: 50 }, { width: 200, height: 150 }, '#FF5722', canvas);
-const desk1 = new Desk('desk1', { x: 100, y: 250 }, { width: 150, height: 100 }, '#4CAF50', '#2196F3', canvas, 0, 10);
+const desk1 = new Desk('desk1', { x: 0, y: 0 }, { width: 150, height: 100 }, '#4CAF80', '#2196F4', canvas, 0,10,false);
+const desk2 = new Desk('desk2', { x: 100, y: 250 }, { width: 150, height: 100 }, '#4CAF50', '#2196F3', canvas, 0,10,true);
 // const toilet1 = new Toilet('toilet1', { x: 500, y: 100 }, { width: 60, height: 60 }, '#2196F3');
 
 // Add objects to floor map
 
-map.addObject(room1);
-map.addObject(desk1);
+map.addObjects(
+    desk1,
+    desk2,
+
+);
+
