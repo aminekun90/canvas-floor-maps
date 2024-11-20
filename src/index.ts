@@ -1,2 +1,3 @@
-export { FloorMap, FloorMapOptions } from './FloorMap';
+export { FloorMap } from './FloorMap';
+export * from './types';
 export * from './utils/helpers';
